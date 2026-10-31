@@ -1,0 +1,100 @@
+# 台股自動化系統設定（敏感金鑰請放 .env，勿提交）
+
+watchlist:
+  - "2330"   # 台積電
+  - "2317"   # 鴻海
+  - "2454"   # 聯發科
+  - "2881"   # 富邦金
+  - "0050"   # 元大台灣50
+
+storage:
+  db_path: "data/stocks.db"
+  chart_dir: "charts"
+
+fetch:
+  # historical: yfinance | finmind | twse
+  historical_source: "yfinance"
+  # 初次回補天數
+  lookback_days: 365
+  # 證交所當日全市場（收盤後約 15:30 後可用）
+  twse_day_all_url: "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
+  tpex_day_all_url: "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_quotes"
+
+finmind:
+  token: ""
+
+indicators:
+  ma_periods: [5, 20, 60]
+  rsi_period: 14
+  macd:
+    fast: 12
+    slow: 26
+    signal: 9
+  kd:
+    k_period: 9
+    d_period: 3
+
+# 指標條件觸發後推送到 LINE Messaging API
+# （LINE Notify 已於 2025-03-31 停用）
+alerts:
+  enabled: true
+  # 同一條件冷卻小時數，避免重複洗版
+  cooldown_hours: 24
+  rules:
+    - name: "RSI 超賣"
+      indicator: "rsi"
+      op: "<"
+      value: 30
+      message: "{symbol} RSI={value:.1f} 進入超賣區"
+    - name: "RSI 超買"
+      indicator: "rsi"
+      op: ">"
+      value: 70
+      message: "{symbol} RSI={value:.1f} 進入超買區"
+    - name: "站上月線"
+      indicator: "close_above_ma"
+      ma: 20
+      message: "{symbol} 收盤 {close:.2f} 站上 MA20 {ma:.2f}"
+    - name: "跌破月線"
+      indicator: "close_below_ma"
+      ma: 20
+      message: "{symbol} 收盤 {close:.2f} 跌破 MA20 {ma:.2f}"
+    - name: "MACD 黃金交叉"
+      indicator: "macd_golden_cross"
+      message: "{symbol} MACD 出現黃金交叉"
+    - name: "MACD 死亡交叉"
+      indicator: "macd_death_cross"
+      message: "{symbol} MACD 出現死亡交叉"
+
+line:
+  channel_access_token: ""
+  user_id: ""
+  # dry_run=true 時只印出通知內容，不實際送出
+  dry_run: true
+
+sinopac:
+  api_key: ""
+  secret_key: ""
+  person_id: ""
+  ca_path: "certs/Sinopac.pfx"
+  ca_passwd: ""
+  # 預設模擬下單；實盤需同時 simulation=false 且 enable_live_trading=true
+  simulation: true
+  enable_live_trading: false
+  # 自動下單策略（觸發 alert 後可選擇下單，預設關閉）
+  auto_trade:
+    enabled: false
+    # 對應 alerts.rules 的 name
+    buy_on: ["RSI 超賣", "MACD 黃金交叉"]
+    sell_on: ["RSI 超買", "MACD 死亡交叉"]
+    quantity: 1
+    # LMT | MKT
+    price_type: "MKT"
+    # 限價單時相對收盤價的偏移（%）
+    limit_offset_pct: 0.0
+
+scheduler:
+  # 台灣時間，證交所日報約收盤後更新
+  daily_fetch_cron: "30 16 * * 1-5"
+  alert_cron: "0 17 * * 1-5"
+  timezone: "Asia/Taipei"

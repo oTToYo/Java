@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tw-stock-bot"
+version = "0.1.0"
+description = "台灣股市每日抓取、K線圖、LINE 指標通知、永豐 Shioaji 自動下單"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "pandas>=2.2.0",
+  "numpy>=1.26.0",
+  "requests>=2.31.0",
+  "PyYAML>=6.0.1",
+  "python-dotenv>=1.0.1",
+  "yfinance>=0.2.40",
+  "mplfinance>=0.12.10b0",
+  "matplotlib>=3.8.0",
+  "APScheduler>=3.10.4",
+  "streamlit>=1.36.0",
+]
+
+[project.optional-dependencies]
+finmind = ["FinMind>=1.7.0"]
+trading = ["shioaji>=1.2.0"]
+dev = ["pytest>=8.0.0"]
+
+[project.scripts]
+tw-stock = "tw_stock.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["tw_stock*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
