@@ -1,0 +1,15 @@
+pandas>=2.2.0
+numpy>=1.26.0
+requests>=2.31.0
+PyYAML>=6.0.1
+python-dotenv>=1.0.1
+yfinance>=0.2.40
+mplfinance>=0.12.10b0
+matplotlib>=3.8.0
+APScheduler>=3.10.4
+streamlit>=1.36.0
+# 可選：FinMind 歷史資料
+FinMind>=1.7.0
+# 可選：永豐下單（未安裝也可跑抓資料 / 圖表 / dry-run）
+shioaji>=1.2.0
+pytest>=8.0.0
